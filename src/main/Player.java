@@ -8,7 +8,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +58,6 @@ import javafx.util.Duration;
 
 /** Example of playing all audio files in a given directory. */
 public class Player extends Application {
-
-	public static final String TAG_COLUMN_NAME = "Tag";
-	public static final String VALUE_COLUMN_NAME = "Value";
-	public static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList(".mp3", ".m4a");
-	public static final int FILE_EXTENSION_LEN = 3;
-	public static final String DIR_PATH = "src/temp/dir.txt";
 
 	final TextFlow currentlyPlaying = new TextFlow();
 	@SuppressWarnings("rawtypes")
@@ -117,8 +110,8 @@ public class Player extends Application {
 		for (String key : metadata.keySet()) {
 			Map<String, Object> dataRow = new HashMap<>();
 
-			dataRow.put(TAG_COLUMN_NAME, key);
-			dataRow.put(VALUE_COLUMN_NAME, metadata.get(key));
+			dataRow.put(Reference.TAG_COLUMN_NAME, key);
+			dataRow.put(Reference.VALUE_COLUMN_NAME, metadata.get(key));
 
 			allData.add(dataRow);
 		}
@@ -144,15 +137,15 @@ public class Player extends Application {
 
 	private String getMusDir() {
 		try {
-			File path = new File(DIR_PATH.substring(0, DIR_PATH.length()-8));
+			File path = new File(Reference.DIR_PATH.substring(0, Reference.DIR_PATH.length()-8));
 			path.mkdirs();
-			File file = new File(DIR_PATH);
+			File file = new File(Reference.DIR_PATH);
 			if(file.createNewFile()){
-				PrintWriter writer = new PrintWriter(new FileWriter(DIR_PATH));
+				PrintWriter writer = new PrintWriter(new FileWriter(Reference.DIR_PATH));
 				writer.write("C:/");
 				writer.close();
 			}
-			BufferedReader reader = new BufferedReader(new FileReader(DIR_PATH));
+			BufferedReader reader = new BufferedReader(new FileReader(Reference.DIR_PATH));
 			String dir = reader.readLine();
 			reader.close();
 			return dir;
@@ -182,7 +175,7 @@ public class Player extends Application {
 		for (String file : dir.list(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
-				for (String ext : SUPPORTED_FILE_EXTENSIONS) {
+				for (String ext : Reference.SUPPORTED_FILE_EXTENSIONS) {
 					if (name.endsWith(ext)) {
 						return true;
 					}
@@ -279,13 +272,13 @@ public class Player extends Application {
 		// add a metadataTable for meta data display
 		metadataTable.setStyle("-fx-font-size: 13px;");
 
-		TableColumn<Map, String> tagColumn = new TableColumn<>(TAG_COLUMN_NAME);
+		TableColumn<Map, String> tagColumn = new TableColumn<>(Reference.TAG_COLUMN_NAME);
 		tagColumn.setPrefWidth(150);
-		TableColumn<Map, Object> valueColumn = new TableColumn<>(VALUE_COLUMN_NAME);
+		TableColumn<Map, Object> valueColumn = new TableColumn<>(Reference.VALUE_COLUMN_NAME);
 		valueColumn.setPrefWidth(400);
 
-		tagColumn.setCellValueFactory(new MapValueFactory<>(TAG_COLUMN_NAME));
-		valueColumn.setCellValueFactory(new MapValueFactory<>(VALUE_COLUMN_NAME));
+		tagColumn.setCellValueFactory(new MapValueFactory<>(Reference.TAG_COLUMN_NAME));
+		valueColumn.setCellValueFactory(new MapValueFactory<>(Reference.VALUE_COLUMN_NAME));
 
 		metadataTable.setEditable(true);
 		metadataTable.getSelectionModel().setCellSelectionEnabled(true);
@@ -454,7 +447,7 @@ public class Player extends Application {
 		newPlayer.currentTimeProperty().addListener(progressChangeListener);
 
 		String source = newPlayer.getMedia().getSource();
-		source = source.substring(0, source.length() - FILE_EXTENSION_LEN - 1);
+		source = source.substring(0, source.length() - Reference.FILE_EXTENSION_LEN - 1);
 		source = source.substring(source.lastIndexOf("/") + 1).replaceAll("%20", " ");
 		text.setText(source);
 		text.setFont(Font.font("Calibri", FontWeight.BLACK, 20));
@@ -479,7 +472,7 @@ public class Player extends Application {
 	private void setMusDir(String dir) {
 		try {
 			PrintWriter writer;
-			writer = new PrintWriter(new FileWriter(DIR_PATH));
+			writer = new PrintWriter(new FileWriter(Reference.DIR_PATH));
 			writer.println(dir);
 			writer.close();
 		} catch (IOException e) {
