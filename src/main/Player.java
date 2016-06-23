@@ -137,10 +137,10 @@ public class Player extends Application {
 
 	private String getMusDir() {
 		try {
-			File path = new File(Reference.DIR_PATH.substring(0, Reference.DIR_PATH.length()-8));
+			File path = new File(Reference.DIR_PATH.substring(0, Reference.DIR_PATH.length() - 8));
 			path.mkdirs();
 			File file = new File(Reference.DIR_PATH);
-			if(file.createNewFile()){
+			if (file.createNewFile()) {
 				PrintWriter writer = new PrintWriter(new FileWriter(Reference.DIR_PATH));
 				writer.write("C:/");
 				writer.close();
@@ -187,15 +187,11 @@ public class Player extends Application {
 			players.add(createPlayer("file:///" + (dir + "\\" + file).replace("\\", "/").replaceAll(" ", "%20")));
 		if (players.isEmpty()) {
 			chooseDir(0);
+			return;
 		}
 
 		// create a view to show the mediaplayers.
-		if(players.isEmpty()){
-			musdir = getMusDir();
-			initPlayer();
-		}else{
-			mediaView.setMediaPlayer(players.get(0));
-		}
+		mediaView.setMediaPlayer(players.get(0));
 		
 		// play each audio file in turn.
 		for (int i = 0; i < players.size(); i++) {
@@ -317,7 +313,7 @@ public class Player extends Application {
 			}
 		});
 		mediaView.getMediaPlayer().setVolume(vol.getValue());
-		
+
 		Delta dragDelta = new Delta();
 		// layout the scene.
 		VBox layout = new VBox(10);
@@ -360,6 +356,7 @@ public class Player extends Application {
 			@Override
 			public void handle(MouseEvent arg0) {
 				chooseDir(0);
+				return;
 			}
 		});
 		vol.valueProperty().addListener(new ChangeListener<Number>() {
