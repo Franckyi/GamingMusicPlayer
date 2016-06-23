@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -27,10 +29,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Slider;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -40,6 +39,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -48,18 +48,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Callback;
 import javafx.util.Duration;
 
 /** Example of playing all audio files in a given directory. */
 public class Player extends Application {
 
-	final TextFlow currentlyPlaying = new TextFlow();
+	final StackPane currentlyPlaying = new StackPane();
 	@SuppressWarnings("rawtypes")
 	final TableView<Map> metadataTable = new TableView<>();
 	private ChangeListener<Duration> progressChangeListener;
@@ -155,7 +152,6 @@ public class Player extends Application {
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void initPlayer() {
 		skip.setPickOnBounds(true);
 		play.setPickOnBounds(true);
@@ -265,53 +261,6 @@ public class Player extends Application {
 		invisiblePause.setPrefHeight(30);
 		invisiblePause.setVisible(false);
 
-		// add a metadataTable for meta data display
-		metadataTable.setStyle("-fx-font-size: 13px;");
-
-		TableColumn<Map, String> tagColumn = new TableColumn<>(Reference.TAG_COLUMN_NAME);
-		tagColumn.setPrefWidth(150);
-		TableColumn<Map, Object> valueColumn = new TableColumn<>(Reference.VALUE_COLUMN_NAME);
-		valueColumn.setPrefWidth(400);
-
-		tagColumn.setCellValueFactory(new MapValueFactory<>(Reference.TAG_COLUMN_NAME));
-		valueColumn.setCellValueFactory(new MapValueFactory<>(Reference.VALUE_COLUMN_NAME));
-
-		metadataTable.setEditable(true);
-		metadataTable.getSelectionModel().setCellSelectionEnabled(true);
-		metadataTable.getColumns().setAll(tagColumn, valueColumn);
-		valueColumn.setCellFactory(new Callback<TableColumn<Map, Object>, TableCell<Map, Object>>() {
-			@Override
-			public TableCell<Map, Object> call(TableColumn<Map, Object> column) {
-				return new TableCell<Map, Object>() {
-					@Override
-					protected void updateItem(Object item, boolean empty) {
-						super.updateItem(item, empty);
-
-						if (item != null) {
-							if (item instanceof String) {
-								setText((String) item);
-								setGraphic(null);
-							} else if (item instanceof Integer) {
-								setText(Integer.toString((Integer) item));
-								setGraphic(null);
-							} else if (item instanceof Image) {
-								setText(null);
-								ImageView imageView = new ImageView((Image) item);
-								imageView.setFitWidth(200);
-								imageView.setPreserveRatio(true);
-								setGraphic(imageView);
-							} else {
-								setText("N/A");
-								setGraphic(null);
-							}
-						} else {
-							setText(null);
-							setGraphic(null);
-						}
-					}
-				};
-			}
-		});
 		mediaView.getMediaPlayer().setVolume(vol.getValue());
 
 		Delta dragDelta = new Delta();
@@ -382,7 +331,6 @@ public class Player extends Application {
 		layout.getChildren().addAll(invisiblePause, content);
 		progress.setMaxWidth(Double.MAX_VALUE);
 		HBox.setHgrow(progress, Priority.ALWAYS);
-		VBox.setVgrow(metadataTable, Priority.ALWAYS);
 
 		layout.setStyle("-fx-effect: dropshadow(gaussian, grey, 50, 0, 0, 0);" + "-fx-background-insets: 50; "
 				+ "-fx-background-color: rgba(255,255,255,0.5);" + "-fx-padding:0 50 50 50;" + "-fx-text-fill:grey;");
@@ -414,7 +362,7 @@ public class Player extends Application {
 						new BackgroundFill(Color.rgb(200, 200, 200, 0.5), new CornerRadii(10), new Insets(-5))));
 			}
 		});
-		Scene scene = new Scene(layout, 400, 250);
+		Scene scene = new Scene(layout, 400, 240 + 20 * Reference.MAX_LINES);
 		scene.setFill(Color.TRANSPARENT);
 		mainStage.setScene(scene);
 		mainStage.show();
@@ -446,12 +394,12 @@ public class Player extends Application {
 		String source = newPlayer.getMedia().getSource();
 		source = source.substring(0, source.length() - Reference.FILE_EXTENSION_LEN - 1);
 		source = source.substring(source.lastIndexOf("/") + 1).replaceAll("%20", " ");
+		source = WordUtils.wrap(source, Reference.MAX_CHAR);
 		text.setText(source);
 		text.setFont(Font.font("Calibri", FontWeight.BLACK, 20));
-		if (!currentlyPlaying.getChildren().isEmpty())
-			currentlyPlaying.getChildren().remove(0);
-		currentlyPlaying.getChildren().add(text);
-		currentlyPlaying.setTextAlignment(TextAlignment.CENTER);
+		currentlyPlaying.getChildren().setAll(text);
+		currentlyPlaying.setAlignment(Pos.CENTER);
+		currentlyPlaying.setPrefHeight(10 + 20 * Reference.MAX_LINES);
 		setMetaDataDisplay(newPlayer.getMedia().getMetadata());
 	}
 
